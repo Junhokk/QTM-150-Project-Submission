@@ -1,0 +1,95 @@
+```{r}
+#As an active patron of the cinema, I try to watch as much movies as I can. However, it's impossible to have that much time to watch every movie. That's why a lot of people, including me, look at movie reviews, but especially ratings, to choose which movie we should watch in the limited time we have. 
+#Unfortunately, movie ratings do not always reflect the popularity of movie at the box office. 
+#The popularity of movies can easier be measured in the amount of box office gross revenue they generate. 
+#The review website Rotten Tomatoes has the reputation as the most reliable movie reviewer on the Internet. 
+#But I plan to analyze if Rotten Tomatoes ratings truly reflect how much gross revenue they generate. 
+#The goal of my project is to find if there is a correlation between movie ratings and movie box office gross in USD. 
+```
+
+```{r}
+library(mosaic)
+library(openintro)
+
+summary(QTM_150_dataset$`US Box Office Gross USD`)
+names(QTM_150_dataset)
+summary(QTM_150_dataset)
+head(QTM_150_dataset)
+str(QTM_150_dataset)
+```
+
+```{r}
+#To conduct this experiment, I drew up Rotten Tomatoes' "Top 100 Movies of 2018" for the best rated movies of the year. 
+#I put this data into my dataset and then found each individual US Box Office Gross in United States Dollars from Box Office Mojo.com to each respectful movie. 
+#I cleaned the data of the movies that were in the top 100 but did not revenue any movie due to the fact that they were not released yet or were not released on cinema but instead on TV shows such as Netflix or HBO. 
+#I  ran some summary and str codes to glean over what I first dealing with and checking the data made sense before proceeding. 
+
+#My hypothesis was that there is no correlation between movie ratings and how much revenue they generate and that the mean and distribution of each of the three category of movies would be very close to being similar to each other. 
+#That as my null hypothesis, my alternative hypothesis was that at least one mean and distribution was different from the rest. 
+#I predicted that movies in each category, despite how much or how little money they made would have a fairly normal distribution of fairly good and bad ratings per category. 
+```
+
+```{r}
+boxplot(QTM_150_dataset$Rating~QTM_150_dataset$`US Box Office Gross USD`,
+        main = "Relationship Between Ratings and US Box Office Gross USD",
+        xlab = "US Box Office Gross USD",
+        ylab = "Ratings")
+favstats(QTM_150_dataset$Rating~QTM_150_dataset$`US Box Office Gross USD`)
+```
+```{r}
+hist(QTM_150_dataset$Rating[QTM_150_dataset$`US Box Office Gross USD Factored`=="Under a Million dollar Movie"],xlab="Rating",main="Ratings vs Under a Million dollar Movie")
+hist(QTM_150_dataset$Rating[QTM_150_dataset$`US Box Office Gross USD Factored`=="Million Dollar Movie"],xlab="Rating",main="Ratings vs Million Dollar Movie")
+hist(QTM_150_dataset$Rating[QTM_150_dataset$`US Box Office Gross USD Factored`=="Over $50,000,000 Movie"],xlab="Rating",main="Ratings vs Over $50,000,000 Movie")
+```
+
+```{r}
+summary(QTM_150_dataset$`US Box Office Gross USD`)
+is.numeric(QTM_150_dataset$`US Box Office Gross USD`)
+
+QTM_150_dataset$`US Box Office Gross USD Factored`<-factor(NA,levels=c("Under a Million dollar Movie","Million Dollar Movie","Over $50,000,000 Movie"))
+
+QTM_150_dataset$`US Box Office Gross USD Factored`[QTM_150_dataset$`US Box Office Gross USD`<=1000000]<-"Under a Million dollar Movie" 
+QTM_150_dataset$`US Box Office Gross USD Factored`[QTM_150_dataset$`US Box Office Gross USD`>1000000 & QTM_150_dataset$`US Box Office Gross USD`<=50000000]<-"Million Dollar Movie" 
+QTM_150_dataset$`US Box Office Gross USD Factored`[QTM_150_dataset$`US Box Office Gross USD`>50000000]<-"Over $50,000,000 Movie"
+is.factor(QTM_150_dataset$`US Box Office Gross USD Factored`)
+table(QTM_150_dataset$`US Box Office Gross USD Factored`)
+plot(QTM_150_dataset$Rating~QTM_150_dataset$`US Box Office Gross USD Factored`,
+     main = "Relationship Between Movie Ratings and US Box Office Gross in USD",
+     xlab = "Movie Rating",
+     ylab = "US Box Office Gross USD")
+
+summary(QTM_150_dataset$`US Box Office Gross USD Factored`)
+#Movies revenue ranged from the ten thousands to the hundred millions. 
+#Due to this, I chose to factor the quantitative variable of Box Office Gross into a factor variable with three levels: Under a Million dollar Movie, Million Dollar Movie, Over $50,000,000 Movie. 
+#I did this to easier compare and visualize the data results for easier analysis to see the correlation.
+```
+
+```{r}
+summary(QTM_150_dataset$`US Box Office Gross USD`)
+is.numeric(QTM_150_dataset$`US Box Office Gross USD`)
+
+QTM_150_dataset$`US Box Office Gross USD Factored`<-factor(NA,levels=c("Under a Million dollar Movie","Million Dollar Movie","Over $50,000,000 Movie"))
+
+ggplot(QTM_150_dataset, aes(x=QTM_150_dataset$`US Box Office Gross USD`, y=QTM_150_dataset$Rating))+
+  geom_point()+
+  labs(x="US Box Office Gross USD",y="Rating",title="Figure 1:Relationship between Ratings and US Box Office Gross USD")+
+  theme_gray()
+
+#I used additional code to draw up graphs and relating both with US Box Office gross revenue in USD as a quantitative variable and a factor variable. 
+#I found that there are clear signs that there is an association in that movies that tend to make more money have lower ratings. 
+#Movies with higher ratings usually generated lower money. 
+```
+
+```{r}
+anova.place <- aov(QTM_150_dataset$Rating~QTM_150_dataset$`US Box Office Gross USD Factored`)
+summary(anova.place)  
+#To test my hypothesis, I used an ANOVA test to calculate the difference and compare the mean information between the three groups. 
+#I found a p-value of 7.88e-07 which is extremely small and much less than 0.05, making me reject the null hypothesis and concluding there is an association between rating and box office gross revenue. 
+```
+
+```{r}
+cor(QTM_150_dataset$Rating,QTM_150_dataset$`US Box Office Gross USD`)
+cor.test(QTM_150_dataset$Rating, QTM_150_dataset$`US Box Office Gross USD`)
+#I double checked my data and assumptions in a correlation test in which I found the correlation to be -0.2512089 and the p-value as 0.02039 which is less than 0.05, again reconfirming that we should reject the null hypothesis and conclude that none of the means of the three factor groups are equal but rather follow the same association I have concluded previously. 
+#I also found the 95 percent confidence interval to be -0.44073655 -0.04023919 which does not include the value 0 (which indicates no difference) but rather values far from 0, showing a clear correlation between the two variables. 
+```
